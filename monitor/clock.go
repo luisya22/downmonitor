@@ -13,9 +13,9 @@ func (rt *RealTime) Now() time.Time {
 }
 
 type MockTime struct {
-	MockTime time.Time
+	time time.Time
 }
 
 func (mt *MockTime) Now() time.Time {
-	return mt.MockTime
+	return mt.time
 }

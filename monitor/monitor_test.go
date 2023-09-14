@@ -90,7 +90,7 @@ func TestTrackInternetOutage(t *testing.T) {
 			var buffer bytes.Buffer
 
 			clock := MockTime{
-				tt.eventTime,
+				time: tt.eventTime,
 			}
 
 			trackInternetOutage(&tt.lastStateWasDown, tt.entry, &buffer, tt.validationFunc, &clock, 0)

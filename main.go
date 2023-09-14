@@ -20,10 +20,17 @@ func main() {
 			}
 			defer file.Close()
 
-			err = monitor.QueryData(file)
+			clock := &monitor.RealTime{}
+
+			res, err := monitor.QueryData(file, clock)
 			if err != nil {
 				fmt.Printf("error querying: %s\n", err.Error())
 			}
+
+			fmt.Printf("Today: Average downtime: %d seconds, Downtimes: %d\n", res.Today.Avg, res.Today.Amount)
+			fmt.Printf("Last 7 days: Average daily downtime: %d seconds, Downtimes: %d\n", res.Days7.Avg, res.Days7.Amount)
+			fmt.Printf("Last 30 days: Average daily downtime: %d seconds, Downtimes: %d\n", res.Days30.Avg, res.Days30.Amount)
+			fmt.Printf("---------\n\n----------\n")
 
 			time.Sleep(15 * time.Second)
 		}
