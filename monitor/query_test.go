@@ -54,16 +54,19 @@ func TestQueryData(t *testing.T) {
 			actualTime: time.Date(2023, time.September, 12, 20, 34, 0, 0, time.UTC),
 			wantsResponse: QueryResponse{
 				Today: QueryRow{
-					Avg:    3600,
-					Amount: 1,
+					Avg:      3600,
+					Amount:   1,
+					TotalSum: 3600,
 				},
 				Days7: QueryRow{
-					Avg:    3600,
-					Amount: 2,
+					Avg:      3600,
+					Amount:   2,
+					TotalSum: 7200,
 				},
 				Days30: QueryRow{
-					Avg:    3600,
-					Amount: 3,
+					Avg:      3600,
+					Amount:   3,
+					TotalSum: 10_800,
 				},
 			},
 		},

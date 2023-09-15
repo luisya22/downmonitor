@@ -9,8 +9,9 @@ import (
 )
 
 type QueryRow struct {
-	Avg    int
-	Amount int
+	Avg      int
+	Amount   int
+	TotalSum int
 }
 
 type QueryResponse struct {
@@ -26,6 +27,10 @@ func (qr *QueryRow) Equal(c QueryRow) bool {
 	}
 
 	if qr.Amount != c.Amount {
+		return false
+	}
+
+	if qr.TotalSum != c.TotalSum {
 		return false
 	}
 
@@ -60,6 +65,7 @@ func QueryData(r io.Reader, clock Clock) (QueryResponse, error) {
 	sevenDaysAgo := today.AddDate(0, 0, -7)
 	thirtyDaysAgo := today.AddDate(0, 0, -30)
 
+	var todayTotalSum int
 	var last7DaysDurations int
 	var last7DaysCounts int
 	var last30DaysDurations int
@@ -70,10 +76,12 @@ func QueryData(r io.Reader, clock Clock) (QueryResponse, error) {
 	for _, entry := range entries {
 		entryDate, _ := time.Parse("01/02/2006", entry.Date)
 
-		fmt.Printf("EntryDate: %v\n", entryDate)
-
 		dailyDurations[entry.Date] += entry.DurationInSeconds
 		dailyCounts[entry.Date]++
+
+		if entry.Date == clock.Now().Format("01/02/2006") {
+			todayTotalSum += entry.DurationInSeconds
+		}
 
 		if entryDate.After(sevenDaysAgo) || entryDate.Equal(sevenDaysAgo) {
 			last7DaysDurations += entry.DurationInSeconds
@@ -81,9 +89,7 @@ func QueryData(r io.Reader, clock Clock) (QueryResponse, error) {
 			uniqueDaysInLast7[entry.Date] = struct{}{}
 		}
 
-		fmt.Printf("After30Ago: %v\n", thirtyDaysAgo)
 		if entryDate.After(thirtyDaysAgo) || entryDate.Equal(thirtyDaysAgo) {
-			fmt.Printf("Yes: %v\n", entryDate)
 			last30DaysDurations += entry.DurationInSeconds
 			last30DaysCounts++
 			uniqueDaysInLast30[entry.Date] = struct{}{}
@@ -110,18 +116,21 @@ func QueryData(r io.Reader, clock Clock) (QueryResponse, error) {
 	}
 
 	t := QueryRow{
-		Avg:    avg,
-		Amount: todayEntryCounts,
+		Avg:      avg,
+		Amount:   todayEntryCounts,
+		TotalSum: todayTotalSum,
 	}
 
 	days7 := QueryRow{
-		Avg:    avg7,
-		Amount: last7DaysCounts,
+		Avg:      avg7,
+		Amount:   last7DaysCounts,
+		TotalSum: last7DaysDurations,
 	}
 
 	days30 := QueryRow{
-		Avg:    avg30,
-		Amount: last30DaysCounts,
+		Avg:      avg30,
+		Amount:   last30DaysCounts,
+		TotalSum: last30DaysDurations,
 	}
 
 	res := QueryResponse{
