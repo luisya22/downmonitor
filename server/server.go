@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/luisya22/downmonitor/monitor"
+	"github.com/luisya22/downmonitor/templates"
 )
 
 func Start() {
@@ -37,16 +38,7 @@ func Start() {
 
 		fmt.Printf("data: %v", data)
 
-		tmplFilePath := "./templates/html/template.gohtml"
-
-		tmpl, err := template.ParseFiles(tmplFilePath)
-		if err != nil {
-			fmt.Printf("error: %v\n", err.Error())
-			http.Error(w, "error with template", http.StatusInternalServerError)
-			return
-		}
-
-		err = tmpl.Execute(w, data)
+		err = ExecuteTemplate(w, "html/template.gohtml", data)
 		if err != nil {
 			fmt.Printf("error: %v\n", err.Error())
 			http.Error(w, "error executing template", http.StatusInternalServerError)
@@ -56,4 +48,13 @@ func Start() {
 	})
 
 	http.ListenAndServe(":8720", nil)
+}
+
+func ExecuteTemplate(w http.ResponseWriter, templateName string, data interface{}) error {
+	tmpl, err := template.ParseFS(templates.Static, templateName)
+	if err != nil {
+		return err
+	}
+
+	return tmpl.Execute(w, data)
 }
